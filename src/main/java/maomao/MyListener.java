@@ -1,4 +1,4 @@
-package org.example;
+package maomao;
 
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
@@ -10,13 +10,16 @@ public class MyListener extends ListenerAdapter
     @Override
     public void onMessageReceived(MessageReceivedEvent event)
     {
-        if (event.getAuthor().isBot()) return;
-        
         // We don't want to respond to other bot accounts, including ourselves
-        Message message = event.getMessage();
-        String content = message.getContentRaw();
+        if (event.getAuthor().isBot())
+        {
+            return;
+        }
+        
         // getContentRaw() is an atomic getter
         // getContentDisplay() is a lazy getter which modifies the content for e.g. console view (strip discord formatting)
+        Message message = event.getMessage();
+        String content = message.getContentRaw();
         
         if (content.equals("!ping"))
         {

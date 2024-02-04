@@ -1,4 +1,4 @@
-package org.example;
+package maomao;
 
 public class AniListQuery
 {
@@ -13,6 +13,7 @@ public class AniListQuery
                             status
                             media {
                                 id
+                                type
                                 title {
                                     english
                                 }

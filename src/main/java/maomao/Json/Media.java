@@ -1,4 +1,4 @@
-package org.example.Json;
+package maomao.Json;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -8,6 +8,11 @@ public class Media {
     @SerializedName("id")
     @Expose
     private Integer id;
+    
+    @SerializedName("type")
+    @Expose
+    private String type;
+    
     @SerializedName("title")
     @Expose
     private Title title;
@@ -28,4 +33,8 @@ public class Media {
         this.title = title;
     }
     
+    public String getType()
+    {
+        return type;
+    }
 }
