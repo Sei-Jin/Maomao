@@ -3,8 +3,8 @@ package maomao.Json;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class Activity {
-    
+public class Activities
+{
     @SerializedName("__typename")
     @Expose
     private String typename;

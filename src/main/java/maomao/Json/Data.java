@@ -5,15 +5,17 @@ import com.google.gson.annotations.SerializedName;
 
 public class Data {
     
-    @SerializedName("Activity")
+    @SerializedName("Page")
     @Expose
-    private Activity activity;
+    private Page page;
     
-    public Activity getActivity() {
-        return activity;
+    public Page getPage()
+    {
+        return page;
     }
     
-    public void setActivity(Activity activity) {
-        this.activity = activity;
+    public void setPage(Page page)
+    {
+        this.page = page;
     }
 }

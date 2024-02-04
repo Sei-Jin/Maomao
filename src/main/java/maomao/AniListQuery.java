@@ -5,24 +5,25 @@ public class AniListQuery
     public String getActivityQuery()
     {
         String activityQuery = """
-                query ($search: Int) {
-                    Activity (userId: $search, sort: ID_DESC) {
-                        __typename
-                        ... on ListActivity {
-                            createdAt
-                            status
-                            media {
-                                id
-                                type
-                                title {
-                                    english
+                query ($userId: Int, $lastActivityTime: Int) {
+                    Page {
+                        activities (userId: $userId, createdAt_greater: $lastActivityTime, sort: ID_DESC) {
+                            __typename
+                            ... on ListActivity {
+                                createdAt
+                                status
+                                media {
+                                    id
+                                    type
+                                    title {
+                                        english
+                                    }
                                 }
-                            }
-                            user {
-                                name
-                                avatar {
-                                    large
-                                    medium
+                                user {
+                                    name
+                                    avatar {
+                                        medium
+                                    }
                                 }
                             }
                         }

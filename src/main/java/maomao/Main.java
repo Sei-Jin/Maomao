@@ -1,6 +1,7 @@
 package maomao;
 
 import com.google.gson.Gson;
+import com.google.gson.stream.JsonReader;
 import maomao.Json.JsonResponse;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -8,8 +9,10 @@ import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.requests.GatewayIntent;
-import maomao.Json.Activity;
+import maomao.Json.Activities;
+import org.jetbrains.annotations.NotNull;
 
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -27,41 +30,56 @@ public class Main
     public static void main(String[] args) throws IOException, InterruptedException, URISyntaxException
     {
         String token = Files.readString(Path.of("token.txt"));
-        
+
         JDA jda = JDABuilder.createLight(token)
                 .enableIntents(GatewayIntent.GUILD_MESSAGES, GatewayIntent.MESSAGE_CONTENT)
                 .addEventListeners(new MyListener())
                 .build()
                 .awaitReady();
         
-        MessageChannel textChannel = jda.getTextChannelById("474760408251498498");
+        Gson gson = new Gson();
+        JsonReader reader = new JsonReader(new FileReader("userIds.json"));
+        AniListUsers aniListUsers = gson.fromJson(reader, AniListUsers.class);
         
-        List<Integer> userIDs = Files.readAllLines(Path.of("IDs.txt"))
-                .stream()
-                .mapToInt(Integer::parseInt)
-                .boxed()
-                .toList();
+        for (AniListUser user : aniListUsers.getUsers())
+        {
+            String jsonPayload = createJsonPayload(user);
+            List<Activities> activities = getJsonResponse(jsonPayload).getData().getPage().getActivities();
+            
+            for (Activities activity : activities)
+            {
+                MessageEmbed embed = createMessageEmbed(activity, jda);
+                
+                MessageChannel textChannel = jda.getTextChannelById("474760408251498498");
+                assert textChannel != null;
+                sendMessage(textChannel, embed);
+                
+                Thread.sleep(10000 / aniListUsers.getUsers().size());
+            }
+        }
+    }
+    
+    
+    @NotNull
+    private static String createJsonPayload(AniListUser user)
+    {
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("userId", user.getUserId());
+        variables.put("lastActivityTime", user.getLastActivityTime());
         
         AniListQuery query = new AniListQuery();
-        
-        Map<String, Object> variables = new HashMap<>();
-        variables.put("search", userIDs.getFirst());
         
         Map<String, Object> payload = new HashMap<>();
         payload.put("query", query.getActivityQuery());
         payload.put("variables", variables);
         
+        Gson gson = new Gson();
         
-        Activity activity = getJsonResponse(payload).getData().getActivity();
-        
-        MessageEmbed embed = createMessageEmbed(activity, jda);
-        
-        assert textChannel != null;
-        sendMessage(textChannel, embed);
+        return gson.toJson(payload);
     }
     
     
-    private static MessageEmbed createMessageEmbed(Activity activity, JDA jda)
+    private static MessageEmbed createMessageEmbed(Activities activity, JDA jda)
     {
         String userName = activity.getUser().getName();
         String titleURL = "https://anilist.co/user/" + userName + "/";
@@ -95,13 +113,11 @@ public class Main
     }
     
     
-    private static JsonResponse getJsonResponse(Map<String, Object> payload) throws IOException, URISyntaxException, InterruptedException
+    private static JsonResponse getJsonResponse(String payload) throws IOException, URISyntaxException, InterruptedException
     {
         Gson gson = new Gson();
         
-        String json = gson.toJson(payload);
-        
-        HttpResponse<String> response = sendHttpRequest(json);
+        HttpResponse<String> response = sendHttpRequest(payload);
         
         return gson.fromJson(response.body(), JsonResponse.class);
     }
