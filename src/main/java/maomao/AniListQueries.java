@@ -1,13 +1,13 @@
 package maomao;
 
-public class AniListQuery
+public class AniListQueries
 {
-    public String getActivityQuery()
+    public String getNewActivities()
     {
-        String activityQuery = """
+        String newActivitiesQuery = """
                 query ($userId: Int, $lastActivityTime: Int) {
                     Page {
-                        activities (userId: $userId, createdAt_greater: $lastActivityTime, sort: ID_DESC) {
+                        activities (userId: $userId, createdAt_greater: $lastActivityTime) {
                             __typename
                             ... on ListActivity {
                                 createdAt
@@ -31,7 +31,23 @@ public class AniListQuery
                 }
                 """;
         
-        return sanitizeQuery(activityQuery);
+        return sanitizeQuery(newActivitiesQuery);
+    }
+    
+    
+    public String getLatestActivityTime()
+    {
+        String latestActivityTimeQuery = """
+                query ($userId: Int) {
+                    Activity (userId: $userId, sort: ID_DESC) {
+                            ... on ListActivity {
+                                createdAt
+                        }
+                    }
+                }
+                """;
+        
+        return sanitizeQuery(latestActivityTimeQuery);
     }
     
     

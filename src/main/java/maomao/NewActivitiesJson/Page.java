@@ -1,4 +1,4 @@
-package maomao.Json;
+package maomao.NewActivitiesJson;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -10,14 +10,14 @@ public class Page
     
     @SerializedName("activities")
     @Expose
-    private List<Activities> activities;
+    private List<Activity> activities;
     
-    public List<Activities> getActivities()
+    public List<Activity> getActivities()
     {
         return activities;
     }
     
-    public void setActivities(List<Activities> activities)
+    public void setActivities(List<Activity> activities)
     {
         this.activities = activities;
     }
