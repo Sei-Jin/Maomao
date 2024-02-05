@@ -52,7 +52,8 @@ public class Main
                 waitBetweenRequests(aniListUsers);
                 
                 // If there was not a new activity, check the next user
-                if (latestActivity.getCreatedAt() <= user.getLastActivityTime())
+                if (!latestActivity.getTypename().equals("ListActivity")
+                        || latestActivity.getCreatedAt() <= user.getLastActivityTime())
                 {
                     continue;
                 }
@@ -70,7 +71,7 @@ public class Main
                 
                 for (Activity activity : activities)
                 {
-                    if (!activity.getStatus().equals("completed") || !activity.getTypename().equals("ListActivity"))
+                    if (!activity.getTypename().equals("ListActivity") || !activity.getStatus().equals("completed"))
                     {
                         continue;
                     }

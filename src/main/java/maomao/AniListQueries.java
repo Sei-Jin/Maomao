@@ -40,6 +40,7 @@ public class AniListQueries
         String latestActivityTimeQuery = """
                 query ($userId: Int) {
                     Activity (userId: $userId, sort: ID_DESC) {
+                            __typename
                             ... on ListActivity {
                                 createdAt
                         }
