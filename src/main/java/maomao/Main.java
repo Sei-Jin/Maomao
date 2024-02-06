@@ -52,8 +52,6 @@ public class Main
             aniListUsers = AniListUsers.getUserData();
             botConfiguration = BotConfiguration.getBotConfiguration();
             
-            System.out.println("The request delay is " + botConfiguration.getRequestDelay());
-            
             if (aniListUsers == null)
             {
                 waitBetweenRequests(botConfiguration);
