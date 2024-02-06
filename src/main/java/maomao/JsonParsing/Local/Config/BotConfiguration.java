@@ -11,7 +11,7 @@ public class BotConfiguration
     private String botToken;
     private long channelId;
     private int embedColor;
-    private int delayBetweenRequests;
+    private int requestDelay;
     
     
     public String getBotToken()
@@ -44,14 +44,14 @@ public class BotConfiguration
         this.embedColor = embedColor;
     }
     
-    public int getDelayBetweenRequests()
+    public int getRequestDelay()
     {
-        return delayBetweenRequests;
+        return requestDelay;
     }
     
-    public void setDelayBetweenRequests(int delayBetweenRequests)
+    public void setRequestDelay(int requestDelay)
     {
-        this.delayBetweenRequests = delayBetweenRequests;
+        this.requestDelay = requestDelay;
     }
     
     public static BotConfiguration getBotConfiguration()

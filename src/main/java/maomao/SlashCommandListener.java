@@ -11,8 +11,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Objects;
 
-import static maomao.JsonParsing.Local.UserData.AniListUsers.updateUserData;
-
 public class SlashCommandListener extends ListenerAdapter
 {
     @Override
@@ -34,7 +32,12 @@ public class SlashCommandListener extends ListenerAdapter
         {
             tryToRemoveUser(event);
         }
+        else if (event.getName().equals("set-request-delay"))
+        {
+            setRequestDelay(event);
+        }
     }
+    
     
     private void tryToRemoveUser(SlashCommandInteractionEvent event)
     {
@@ -46,17 +49,17 @@ public class SlashCommandListener extends ListenerAdapter
             
             if (userResponse.getData() == null)
             {
-                event.reply("Your request could not be processed.").queue();
+                event.reply("Your request could not be processed").queue();
                 return;
             }
             else if (userResponse.getData().getUser() == null)
             {
-                event.reply("Sorry, I could not find that user.").queue();
+                event.reply("I could not find an account associated with that username").queue();
                 return;
             }
             else if (AniListUsers.getUserData().getUsers() == null)    // need to test
             {
-                event.reply("There are no users in the list to remove.").queue();
+                event.reply("There are no users in the list to remove").queue();
                 return;
             }
             
@@ -70,7 +73,7 @@ public class SlashCommandListener extends ListenerAdapter
             
             if (userWasRemoved)
             {
-                event.reply("User " + userLink + " was removed from the list of users.").queue();
+                event.reply("User " + userLink + " was removed from the list of users").queue();
             }
             else
             {
@@ -94,7 +97,7 @@ public class SlashCommandListener extends ListenerAdapter
             {
                 aniListUsers.getUsers().remove(user);
                 
-                updateUserData(aniListUsers);
+                AniListUsers.updateUserData(aniListUsers);
                 
                 return true;
             }
@@ -114,13 +117,13 @@ public class SlashCommandListener extends ListenerAdapter
             
             if (userResponse.getData() == null)
             {
-                event.reply("Your request could not be processed.").queue();
+                event.reply("Your request could not be processed").queue();
                 return;
             }
             
             if (userResponse.getData().getUser() == null)
             {
-                event.reply("Sorry, I could not find that user.").queue();
+                event.reply("I could not find an account associated with that username").queue();
                 return;
             }
             
@@ -134,7 +137,7 @@ public class SlashCommandListener extends ListenerAdapter
             {
                 if (userResponse.getData().getUser().getId() == user.getUserId())
                 {
-                    event.reply("User " + userLink + " is already added to the list.").queue();
+                    event.reply("User " + userLink + " is already added to the list").queue();
                     return;
                 }
             }
@@ -143,7 +146,7 @@ public class SlashCommandListener extends ListenerAdapter
             
             String replyMessage = "User "
                     + userLink
-                    + " was added to the list of users.";
+                    + " was added to the list of users";
             
             event.reply(replyMessage).queue();
         }
@@ -163,7 +166,7 @@ public class SlashCommandListener extends ListenerAdapter
         AniListUsers aniListUsers = AniListUsers.getUserData();
         aniListUsers.getUsers().add(newUser);
         
-        updateUserData(aniListUsers);
+        AniListUsers.updateUserData(aniListUsers);
     }
     
     
@@ -188,5 +191,28 @@ public class SlashCommandListener extends ListenerAdapter
         BotConfiguration.updateBotConfiguration(botConfiguration);
         
         event.reply("Embed color was updated").queue();
+    }
+    
+    
+    private void setRequestDelay(SlashCommandInteractionEvent event)
+    {
+        BotConfiguration botConfiguration = BotConfiguration.getBotConfiguration();
+        
+        int requestDelay = Objects.requireNonNull(event.getOption("request-delay")).getAsInt();
+        
+        int minimumRequestDelay = 3000;
+        
+        if (requestDelay < minimumRequestDelay)
+        {
+            event.reply("The given request delay was too low, it must be at least " + minimumRequestDelay + "ms").queue();
+        }
+        else
+        {
+            botConfiguration.setRequestDelay(requestDelay);
+            
+            BotConfiguration.updateBotConfiguration(botConfiguration);
+            
+            event.reply("The request delay was set to " + requestDelay + "ms").queue();
+        }
     }
 }

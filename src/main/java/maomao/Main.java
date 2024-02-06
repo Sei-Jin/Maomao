@@ -38,17 +38,21 @@ public class Main
         
         updateSlashCommands(jda);
         
-        checkListActivitiesLoop(jda, botConfiguration);
+        checkListActivitiesLoop(jda);
     }
     
     
-    private static void checkListActivitiesLoop(JDA jda, BotConfiguration botConfiguration) throws URISyntaxException, IOException, InterruptedException
+    private static void checkListActivitiesLoop(JDA jda) throws URISyntaxException, IOException, InterruptedException
     {
         AniListUsers aniListUsers;
+        BotConfiguration botConfiguration;
         
         while (true)
         {
             aniListUsers = AniListUsers.getUserData();
+            botConfiguration = BotConfiguration.getBotConfiguration();
+            
+            System.out.println("The request delay is " + botConfiguration.getRequestDelay());
             
             if (aniListUsers == null)
             {
@@ -107,7 +111,7 @@ public class Main
     
     private static void waitBetweenRequests(BotConfiguration botConfiguration) throws InterruptedException
     {
-        Thread.sleep(botConfiguration.getDelayBetweenRequests());
+        Thread.sleep(botConfiguration.getRequestDelay());
     }
     
     
@@ -128,6 +132,10 @@ public class Main
                         
                         Commands.slash("change-embed-color", "Changes the color of the embeds")
                                 .addOption(OptionType.INTEGER, "embed-color", "The color of the embed as an integer value")
+                                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR)),
+                        
+                        Commands.slash("set-request-delay", "Changes the delay between requests")
+                                .addOption(OptionType.INTEGER, "request-delay", "The wait time between requests in milliseconds")
                                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR))
                 ).queue();
     }
