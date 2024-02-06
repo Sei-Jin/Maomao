@@ -1,37 +1,37 @@
 package maomao;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.stream.JsonReader;
+import maomao.JsonParsing.LatestActivity.LatestActivityResponse;
+import maomao.JsonParsing.NewActivities.NewActivitiesResponse;
 import maomao.JsonParsing.UserData.AniListUser;
 import maomao.JsonParsing.UserData.AniListUsers;
 import maomao.JsonParsing.BotConfiguration;
 import maomao.JsonParsing.NewActivities.Activity;
 import maomao.JsonParsing.LatestActivity.LatestActivity;
-import maomao.JsonParsing.LatestActivity.LatestActivityResponse;
-import maomao.JsonParsing.NewActivities.NewActivitiesResponse;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 
 import java.io.*;
-import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
+
+import static maomao.AniListRequests.*;
 
 public class Main
 {
     public static void main(String[] args) throws IOException, InterruptedException, URISyntaxException
     {
-        BotConfiguration botConfiguration = getBotConfiguration();
+        BotConfiguration botConfiguration = BotConfiguration.getBotConfiguration();
         
         JDA jda = JDABuilder.createLight(botConfiguration.getBotToken())
                 .enableIntents(GatewayIntent.GUILD_MESSAGES, GatewayIntent.MESSAGE_CONTENT)
@@ -39,18 +39,16 @@ public class Main
                 .build()
                 .awaitReady();
         
-        AniListUsers aniListUsers = getAniListUsers();
+        updateSlashCommands(jda);
+        
+        AniListUsers aniListUsers = AniListUsers.getUserData();
         
         while (true)
         {
             for (AniListUser user : aniListUsers.getUsers())
             {
                 // Check if there were new list activities for the user
-                String latestActivityTimePayload = createLatestActivityTimePayload(user);
-                
-                LatestActivity latestActivity = getLatestActivityTimeResponse(latestActivityTimePayload)
-                        .getData()
-                        .getLatestActivity();
+                LatestActivity latestActivity = getLatestActivity(user);
                 
                 waitBetweenRequests(aniListUsers, botConfiguration);
                 
@@ -61,16 +59,13 @@ public class Main
                     continue;
                 }
                 
-                String newActivitiesPayload = createNewActivitiesPayload(user);
-                
-                List<Activity> activities = getNewActivitiesResponse(newActivitiesPayload)
-                        .getData()
-                        .getPage()
-                        .getActivities();
+                List<Activity> activities = getActivities(user);
                 
                 waitBetweenRequests(aniListUsers, botConfiguration);
                 
-                updateUserData(user, activities, aniListUsers);
+                user.setLastActivityTime(activities.getLast().getCreatedAt());
+                
+                AniListUsers.updateUserData(aniListUsers);
                 
                 for (Activity activity : activities)
                 {
@@ -82,10 +77,59 @@ public class Main
                     MessageEmbed embed = createMessageEmbed(activity, jda, botConfiguration);
                     
                     MessageChannel textChannel = jda.getTextChannelById(botConfiguration.getChannelId());
-                    assert textChannel != null;
-                    sendMessage(textChannel, embed);
+                    
+                    sendMessage(Objects.requireNonNull(textChannel), embed);
                 }
             }
+        }
+    }
+    
+    
+    private static List<Activity> getActivities(AniListUser user) throws URISyntaxException, IOException, InterruptedException
+    {
+        String newActivitiesPayload = createNewActivitiesPayload(user);
+        
+        HttpResponse<String> response = sendHttpRequest(newActivitiesPayload);
+        
+        return deserialize(response.body(), NewActivitiesResponse.class)
+                .getData()
+                .getPage()
+                .getActivities();
+    }
+    
+    
+    private static LatestActivity getLatestActivity(AniListUser user) throws URISyntaxException, IOException, InterruptedException
+    {
+        String latestActivityTimePayload = createLatestActivityTimePayload(user);
+        
+        HttpResponse<String> response = sendHttpRequest(latestActivityTimePayload);
+        
+        return deserialize(response.body(), LatestActivityResponse.class)
+                .getData()
+                .getLatestActivity();
+    }
+    
+    
+    private static void updateSlashCommands(JDA jda)
+    {
+        for (Guild guild : jda.getGuilds())
+        {
+            guild.updateCommands().
+                    addCommands(
+                        Commands.slash("set-channel", "Set the channel that will receive list updates")
+                            .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR)),
+                        
+                        Commands.slash("add-user", "Add a user to the list of users")
+                            .addOption(OptionType.STRING, "username", "An AniList username")
+                            .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR)),
+                        
+                        Commands.slash("remove-user", "Remove a user from the list of users")
+                            .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR)),
+                        
+                        Commands.slash("change-embed-color", "Changes the color of the embeds")
+                            .addOption(OptionType.INTEGER, "embed-color", "The color of the embed as an integer value")
+                            .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR))
+                    ).queue();
         }
     }
     
@@ -96,118 +140,12 @@ public class Main
     }
     
     
-    private static void updateUserData(AniListUser user, List<Activity> activities, AniListUsers aniListUsers) throws IOException
-    {
-        user.setLastActivityTime(activities.getLast().getCreatedAt());
-        
-        try (Writer writer = new FileWriter("userData.json"))
-        {
-            Gson gson = new GsonBuilder()
-                    .setPrettyPrinting()
-                    .create();
-            
-            gson.toJson(aniListUsers, writer);
-        }
-    }
-    
-    
-    private static LatestActivityResponse getLatestActivityTimeResponse(String latestActivityTimePayload) throws URISyntaxException, IOException, InterruptedException
-    {
-        Gson gson = new Gson();
-        
-        HttpResponse<String> response = sendHttpRequest(latestActivityTimePayload);
-        
-        return gson.fromJson(response.body(), LatestActivityResponse.class);
-    }
-    
-    
-    private static String createLatestActivityTimePayload(AniListUser user)
-    {
-        Map<String, Object> variables = new HashMap<>();
-        variables.put("userId", user.getUserId());
-        
-        AniListQueries query = new AniListQueries();
-        
-        Map<String, Object> payload = new HashMap<>();
-        payload.put("query", query.getLatestActivityTime());
-        payload.put("variables", variables);
-        
-        Gson gson = new Gson();
-        
-        return gson.toJson(payload);
-    }
-    
-    
-    private static BotConfiguration getBotConfiguration() throws FileNotFoundException
-    {
-        Gson gson = new Gson();
-        
-        JsonReader reader = new JsonReader(new FileReader("config.json"));
-        
-        return gson.fromJson(reader, BotConfiguration.class);
-    }
-    
-    
-    private static AniListUsers getAniListUsers() throws FileNotFoundException
-    {
-        Gson gson = new Gson();
-        
-        JsonReader reader = new JsonReader(new FileReader("userData.json"));
-        
-        return gson.fromJson(reader, AniListUsers.class);
-    }
-    
-    
-    private static String createNewActivitiesPayload(AniListUser user)
-    {
-        Map<String, Object> variables = new HashMap<>();
-        variables.put("userId", user.getUserId());
-        variables.put("lastActivityTime", user.getLastActivityTime());
-        
-        AniListQueries query = new AniListQueries();
-        
-        Map<String, Object> payload = new HashMap<>();
-        payload.put("query", query.getNewActivities());
-        payload.put("variables", variables);
-        
-        Gson gson = new Gson();
-        
-        return gson.toJson(payload);
-    }
-    
-    
-    private static NewActivitiesResponse getNewActivitiesResponse(String payload) throws IOException, URISyntaxException, InterruptedException
-    {
-        Gson gson = new Gson();
-        
-        HttpResponse<String> response = sendHttpRequest(payload);
-        
-        return gson.fromJson(response.body(), NewActivitiesResponse.class);
-    }
-    
-    
-    private static HttpResponse<String> sendHttpRequest(String json) throws URISyntaxException, IOException, InterruptedException
-    {
-        HttpClient client = HttpClient.newBuilder()
-                .build();
-        
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(new URI("https://graphql.anilist.co"))
-                .header("Content-Type", "application/json")
-                .header("Accept", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(json))
-                .build();
-        
-        return client.send(request, HttpResponse.BodyHandlers.ofString());
-    }
-    
-    
     private static MessageEmbed createMessageEmbed(Activity activity, JDA jda, BotConfiguration botConfiguration)
     {
         String userName = activity.getUser().getName();
         String titleURL = "https://anilist.co/user/" + userName + "/";
         
-        String description =  activity.getStatus().substring(0, 1).toUpperCase() + activity.getStatus().substring(1)
+        String description = activity.getStatus().substring(0, 1).toUpperCase() + activity.getStatus().substring(1)
                 + " ["
                 + activity.getMedia().getTitle().getEnglish()
                 + "](https://anilist.co/"

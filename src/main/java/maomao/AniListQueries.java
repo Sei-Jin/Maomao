@@ -52,6 +52,21 @@ public class AniListQueries
     }
     
     
+    public String getUserInfo()
+    {
+        String userInfoQuery = """
+                query ($username: String) {
+                    User (search: $username) {
+                        id
+                        updatedAt
+                    }
+                }
+                """;
+        
+        return sanitizeQuery(userInfoQuery);
+    }
+    
+    
     private String sanitizeQuery(String query)
     {
         query = query.replace('\n', ' ');

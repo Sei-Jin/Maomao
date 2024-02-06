@@ -1,30 +1,47 @@
 package maomao;
 
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import maomao.JsonParsing.BotConfiguration;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+
+import java.util.Objects;
+
+import static maomao.AniListRequests.createUserInfoPayload;
 
 public class MyListener extends ListenerAdapter
 {
     @Override
-    public void onMessageReceived(MessageReceivedEvent event)
+    public void onSlashCommandInteraction(SlashCommandInteractionEvent event)
     {
-        // We don't want to respond to other bot accounts, including ourselves
-        if (event.getAuthor().isBot())
+        if (event.getName().equals("set-channel"))
         {
-            return;
+            BotConfiguration botConfiguration = BotConfiguration.getBotConfiguration();
+            
+            botConfiguration.setChannelId(Long.parseLong(event.getChannel().getId()));
+            
+            BotConfiguration.updateBotConfiguration(botConfiguration);
+            
+            event.reply("List update channel was set").queue();
         }
-        
-        // getContentRaw() is an atomic getter
-        // getContentDisplay() is a lazy getter which modifies the content for e.g. console view (strip discord formatting)
-        Message message = event.getMessage();
-        String content = message.getContentRaw();
-        
-        if (content.equals("!ping"))
+        else if (event.getName().equals("change-embed-color"))
         {
-            MessageChannel channel = event.getChannel();
-            channel.sendMessage("Pong!").queue(); // Important to call .queue() on the RestAction returned by sendMessage(...)
+            BotConfiguration botConfiguration = BotConfiguration.getBotConfiguration();
+            
+            botConfiguration.setEmbedColor(Objects.requireNonNull(event.getOption("embed-color")).getAsInt());
+            
+            BotConfiguration.updateBotConfiguration(botConfiguration);
+            
+            event.reply("Embed color was updated").queue();
+        }
+        else if (event.getName().equals("add-user"))
+        {
+            // search username to get id
+            String searchUserPayload = createUserInfoPayload(Objects.requireNonNull(event.getOption("username")).getAsString());
+            
+            // add id to the list of users if the username is valid
+            
+            
+            
         }
     }
 }
