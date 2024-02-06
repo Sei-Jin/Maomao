@@ -1,7 +1,6 @@
 package maomao;
 
-import com.google.gson.Gson;
-import maomao.JsonParsing.UserData.AniListUser;
+import maomao.JsonParsing.Local.UserData.AniListUser;
 
 import java.io.IOException;
 import java.net.URI;
@@ -11,6 +10,8 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.HashMap;
 import java.util.Map;
+
+import static maomao.Serialization.serialize;
 
 public class AniListRequests
 {
@@ -39,13 +40,13 @@ public class AniListRequests
     }
     
     
-    public static String createUserInfoPayload(String username)
+    public static String createUserDataPayload(String username)
     {
         Map<String, Object> variables = new HashMap<>();
         variables.put("username", username);
         
         AniListQueries aniListQueries = new AniListQueries();
-        String query = aniListQueries.getUserInfo();
+        String query = aniListQueries.getUserData();
         
         return createPayload(query, variables);
     }
@@ -57,17 +58,7 @@ public class AniListRequests
         payload.put("query", query);
         payload.put("variables", variables);
         
-        Gson gson = new Gson();
-        
-        return gson.toJson(payload);
-    }
-    
-    
-    public static <T> T deserialize(String json, Class<T> thisClass)
-    {
-        Gson gson = new Gson();
-        
-        return gson.fromJson(json, thisClass);
+       return serialize(payload);
     }
     
     

@@ -52,7 +52,7 @@ public class AniListQueries
     }
     
     
-    public String getUserInfo()
+    public String getUserData()
     {
         String userInfoQuery = """
                 query ($username: String) {

@@ -1,4 +1,4 @@
-package maomao.JsonParsing;
+package maomao.JsonParsing.Local.Config;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -11,7 +11,7 @@ public class BotConfiguration
     private String botToken;
     private long channelId;
     private int embedColor;
-    private int timeBetweenUpdateCycles;
+    private int delayBetweenRequests;
     
     
     public String getBotToken()
@@ -44,11 +44,15 @@ public class BotConfiguration
         this.embedColor = embedColor;
     }
     
-    public int getTimeBetweenUpdateCycles()
+    public int getDelayBetweenRequests()
     {
-        return timeBetweenUpdateCycles;
+        return delayBetweenRequests;
     }
     
+    public void setDelayBetweenRequests(int delayBetweenRequests)
+    {
+        this.delayBetweenRequests = delayBetweenRequests;
+    }
     
     public static BotConfiguration getBotConfiguration()
     {

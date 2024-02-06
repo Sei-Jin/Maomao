@@ -1,17 +1,16 @@
 package maomao;
 
-import maomao.JsonParsing.LatestActivity.LatestActivityResponse;
-import maomao.JsonParsing.NewActivities.NewActivitiesResponse;
-import maomao.JsonParsing.UserData.AniListUser;
-import maomao.JsonParsing.UserData.AniListUsers;
-import maomao.JsonParsing.BotConfiguration;
-import maomao.JsonParsing.NewActivities.Activity;
-import maomao.JsonParsing.LatestActivity.LatestActivity;
+import maomao.JsonParsing.Remote.LatestActivity.LatestActivityResponse;
+import maomao.JsonParsing.Remote.NewActivities.NewActivitiesResponse;
+import maomao.JsonParsing.Local.UserData.AniListUser;
+import maomao.JsonParsing.Local.UserData.AniListUsers;
+import maomao.JsonParsing.Local.Config.BotConfiguration;
+import maomao.JsonParsing.Remote.NewActivities.Activity;
+import maomao.JsonParsing.Remote.LatestActivity.LatestActivity;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
@@ -21,11 +20,9 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 
 import java.io.*;
 import java.net.URISyntaxException;
-import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.Objects;
 
-import static maomao.AniListRequests.*;
 
 public class Main
 {
@@ -35,22 +32,44 @@ public class Main
         
         JDA jda = JDABuilder.createLight(botConfiguration.getBotToken())
                 .enableIntents(GatewayIntent.GUILD_MESSAGES, GatewayIntent.MESSAGE_CONTENT)
-                .addEventListeners(new MyListener())
+                .addEventListeners(new SlashCommandListener())
                 .build()
                 .awaitReady();
         
         updateSlashCommands(jda);
         
-        AniListUsers aniListUsers = AniListUsers.getUserData();
+        checkListActivitiesLoop(jda, botConfiguration);
+    }
+    
+    
+    private static void checkListActivitiesLoop(JDA jda, BotConfiguration botConfiguration) throws URISyntaxException, IOException, InterruptedException
+    {
+        AniListUsers aniListUsers;
         
         while (true)
         {
+            aniListUsers = AniListUsers.getUserData();
+            
+            if (aniListUsers == null)
+            {
+                waitBetweenRequests(botConfiguration);
+                
+                continue;
+            }
+            
             for (AniListUser user : aniListUsers.getUsers())
             {
                 // Check if there were new list activities for the user
-                LatestActivity latestActivity = getLatestActivity(user);
+                LatestActivityResponse latestActivityResponse = LatestActivityResponse.getLatestActivityResponse(user);
                 
-                waitBetweenRequests(aniListUsers, botConfiguration);
+                waitBetweenRequests(botConfiguration);
+                
+                if (latestActivityResponse.getData() == null)
+                {
+                    continue;
+                }
+                
+                LatestActivity latestActivity = latestActivityResponse.getData().getLatestActivity();
                 
                 // If there was not a new activity, check the next user
                 if (!latestActivity.getTypename().equals("ListActivity")
@@ -59,12 +78,13 @@ public class Main
                     continue;
                 }
                 
-                List<Activity> activities = getActivities(user);
+                NewActivitiesResponse newActivitiesResponse = NewActivitiesResponse.getNewActivitiesResponse(user);
                 
-                waitBetweenRequests(aniListUsers, botConfiguration);
+                waitBetweenRequests(botConfiguration);
+                
+                List<Activity> activities = newActivitiesResponse.getData().getPage().getActivities();
                 
                 user.setLastActivityTime(activities.getLast().getCreatedAt());
-                
                 AniListUsers.updateUserData(aniListUsers);
                 
                 for (Activity activity : activities)
@@ -76,67 +96,40 @@ public class Main
                     
                     MessageEmbed embed = createMessageEmbed(activity, jda, botConfiguration);
                     
-                    MessageChannel textChannel = jda.getTextChannelById(botConfiguration.getChannelId());
+                    MessageChannel listUpdateChannel = jda.getTextChannelById(botConfiguration.getChannelId());
                     
-                    sendMessage(Objects.requireNonNull(textChannel), embed);
+                    sendMessage(Objects.requireNonNull(listUpdateChannel), embed);
                 }
             }
         }
     }
     
     
-    private static List<Activity> getActivities(AniListUser user) throws URISyntaxException, IOException, InterruptedException
+    private static void waitBetweenRequests(BotConfiguration botConfiguration) throws InterruptedException
     {
-        String newActivitiesPayload = createNewActivitiesPayload(user);
-        
-        HttpResponse<String> response = sendHttpRequest(newActivitiesPayload);
-        
-        return deserialize(response.body(), NewActivitiesResponse.class)
-                .getData()
-                .getPage()
-                .getActivities();
-    }
-    
-    
-    private static LatestActivity getLatestActivity(AniListUser user) throws URISyntaxException, IOException, InterruptedException
-    {
-        String latestActivityTimePayload = createLatestActivityTimePayload(user);
-        
-        HttpResponse<String> response = sendHttpRequest(latestActivityTimePayload);
-        
-        return deserialize(response.body(), LatestActivityResponse.class)
-                .getData()
-                .getLatestActivity();
+        Thread.sleep(botConfiguration.getDelayBetweenRequests());
     }
     
     
     private static void updateSlashCommands(JDA jda)
     {
-        for (Guild guild : jda.getGuilds())
-        {
-            guild.updateCommands().
-                    addCommands(
+        jda.getGuilds().getFirst().updateCommands()
+                .addCommands(
                         Commands.slash("set-channel", "Set the channel that will receive list updates")
-                            .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR)),
+                                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR)),
                         
                         Commands.slash("add-user", "Add a user to the list of users")
-                            .addOption(OptionType.STRING, "username", "An AniList username")
-                            .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR)),
+                                .addOption(OptionType.STRING, "username", "An AniList username")
+                                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR)),
                         
                         Commands.slash("remove-user", "Remove a user from the list of users")
-                            .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR)),
+                                .addOption(OptionType.STRING, "username", "An AniList username")
+                                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR)),
                         
                         Commands.slash("change-embed-color", "Changes the color of the embeds")
-                            .addOption(OptionType.INTEGER, "embed-color", "The color of the embed as an integer value")
-                            .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR))
-                    ).queue();
-        }
-    }
-    
-    
-    private static void waitBetweenRequests(AniListUsers aniListUsers, BotConfiguration botConfiguration) throws InterruptedException
-    {
-        Thread.sleep(botConfiguration.getTimeBetweenUpdateCycles() / aniListUsers.getUsers().size());
+                                .addOption(OptionType.INTEGER, "embed-color", "The color of the embed as an integer value")
+                                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR))
+                ).queue();
     }
     
     
@@ -158,7 +151,7 @@ public class Main
         String imageURL = "https://img.anili.st/media/" + activity.getMedia().getId();
         
         return new EmbedBuilder()
-                .setColor(botConfiguration.getEmbedColor())                         // 2829634 is the AniList embed color
+                .setColor(botConfiguration.getEmbedColor())
                 .setAuthor(jda.getSelfUser().getName())
                 .setTitle(userName, titleURL)
                 .setDescription(description)
