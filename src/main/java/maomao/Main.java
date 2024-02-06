@@ -3,16 +3,19 @@ package maomao;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonReader;
+import maomao.JsonParsing.UserData.AniListUser;
+import maomao.JsonParsing.UserData.AniListUsers;
+import maomao.JsonParsing.BotConfiguration;
+import maomao.JsonParsing.NewActivities.Activity;
+import maomao.JsonParsing.LatestActivity.LatestActivity;
+import maomao.JsonParsing.LatestActivity.LatestActivityResponse;
+import maomao.JsonParsing.NewActivities.NewActivitiesResponse;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.requests.GatewayIntent;
-import maomao.NewActivitiesJson.Activity;
-import maomao.LatestActivityJson.LatestActivity;
-import maomao.LatestActivityJson.LatestActivityResponse;
-import maomao.NewActivitiesJson.NewActivitiesResponse;
 
 import java.io.*;
 import java.net.URI;
@@ -49,7 +52,7 @@ public class Main
                         .getData()
                         .getLatestActivity();
                 
-                waitBetweenRequests(aniListUsers);
+                waitBetweenRequests(aniListUsers, botConfiguration);
                 
                 // If there was not a new activity, check the next user
                 if (!latestActivity.getTypename().equals("ListActivity")
@@ -65,7 +68,7 @@ public class Main
                         .getPage()
                         .getActivities();
                 
-                waitBetweenRequests(aniListUsers);
+                waitBetweenRequests(aniListUsers, botConfiguration);
                 
                 updateUserData(user, activities, aniListUsers);
                 
@@ -87,9 +90,9 @@ public class Main
     }
     
     
-    private static void waitBetweenRequests(AniListUsers aniListUsers) throws InterruptedException
+    private static void waitBetweenRequests(AniListUsers aniListUsers, BotConfiguration botConfiguration) throws InterruptedException
     {
-        Thread.sleep(10000 / aniListUsers.getUsers().size());
+        Thread.sleep(botConfiguration.getTimeBetweenUpdateCycles() / aniListUsers.getUsers().size());
     }
     
     

@@ -1,10 +1,11 @@
-package maomao;
+package maomao.JsonParsing;
 
 public class BotConfiguration
 {
     private String botToken;
     private long channelId;
     private int embedColor;
+    private int timeBetweenUpdateCycles;
     
     
     public String getBotToken()
@@ -35,5 +36,10 @@ public class BotConfiguration
     public void setEmbedColor(int embedColor)
     {
         this.embedColor = embedColor;
+    }
+    
+    public int getTimeBetweenUpdateCycles()
+    {
+        return timeBetweenUpdateCycles;
     }
 }

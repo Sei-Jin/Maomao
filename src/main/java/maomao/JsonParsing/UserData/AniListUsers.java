@@ -1,4 +1,4 @@
-package maomao;
+package maomao.JsonParsing.UserData;
 
 import java.util.List;
 

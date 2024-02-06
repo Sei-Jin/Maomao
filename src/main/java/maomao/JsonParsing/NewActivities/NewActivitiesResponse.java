@@ -1,10 +1,11 @@
-package maomao.LatestActivityJson;
+package maomao.JsonParsing.NewActivities;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class LatestActivityResponse
+public class NewActivitiesResponse
 {
+    
     @SerializedName("data")
     @Expose
     private Data data;
@@ -12,4 +13,9 @@ public class LatestActivityResponse
     public Data getData() {
         return data;
     }
+    
+    public void setData(Data data) {
+        this.data = data;
+    }
+    
 }

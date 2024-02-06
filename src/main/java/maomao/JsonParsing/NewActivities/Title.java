@@ -1,4 +1,4 @@
-package maomao.NewActivitiesJson;
+package maomao.JsonParsing.NewActivities;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;

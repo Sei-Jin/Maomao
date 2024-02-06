@@ -1,4 +1,4 @@
-package maomao;
+package maomao.JsonParsing.UserData;
 
 public class AniListUser
 {
