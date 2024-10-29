@@ -37,6 +37,9 @@ build/
 ### Mac OS ###
 .DS_Store
 
-###
+### Data files
 userData.json
 config.json
+
+### IntelliJ
+.idea
