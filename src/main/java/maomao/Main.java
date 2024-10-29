@@ -118,22 +118,22 @@ public class Main
     {
         jda.getGuilds().getFirst().updateCommands()
                 .addCommands(
-                        Commands.slash("set-channel", "Set the channel that will receive list updates")
+                        Commands.slash(BotCommand.SET_CHANNEL.getCommand(), "Set the channel that will receive list updates")
                                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR)),
                         
-                        Commands.slash("add-user", "Add a user to the list of users")
+                        Commands.slash(BotCommand.ADD_USER.getCommand(), "Add a user to the list of users")
                                 .addOption(OptionType.STRING, "username", "An AniList username")
                                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR)),
                         
-                        Commands.slash("remove-user", "Remove a user from the list of users")
+                        Commands.slash(BotCommand.REMOVE_USER.getCommand(), "Remove a user from the list of users")
                                 .addOption(OptionType.STRING, "username", "An AniList username")
                                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR)),
                         
-                        Commands.slash("change-embed-color", "Changes the color of the embeds")
+                        Commands.slash(BotCommand.CHANGE_EMBED_COLOR.getCommand(), "Changes the color of the embeds")
                                 .addOption(OptionType.INTEGER, "embed-color", "The color of the embed as an integer value")
                                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR)),
                         
-                        Commands.slash("set-request-delay", "Changes the delay between requests")
+                        Commands.slash(BotCommand.SET_REQUEST_DELAY.getCommand(), "Changes the delay between requests")
                                 .addOption(OptionType.INTEGER, "request-delay", "The wait time between requests in milliseconds")
                                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR))
                 ).queue();

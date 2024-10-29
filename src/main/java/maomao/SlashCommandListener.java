@@ -17,25 +17,26 @@ public class SlashCommandListener extends ListenerAdapter
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event)
     {
-        if (event.getName().equals("set-channel"))
+        BotCommand commandName;
+        
+        try
         {
-            setChannelId(event);
+            commandName = BotCommand.valueOf(event.getName().toUpperCase().replace("-", "_"));
         }
-        else if (event.getName().equals("change-embed-color"))
+        catch (IllegalArgumentException e)
         {
-            changeEmbedColor(event);
+            // Handle unknown command
+            event.reply("Unknown command: " + event.getName()).setEphemeral(true).queue();
+            return;
         }
-        else if (event.getName().equals("add-user"))
+        
+        switch (commandName)
         {
-            tryToAddUser(event);
-        }
-        else if (event.getName().equals("remove-user"))
-        {
-            tryToRemoveUser(event);
-        }
-        else if (event.getName().equals("set-request-delay"))
-        {
-            setRequestDelay(event);
+            case SET_CHANNEL -> setChannelId(event);
+            case CHANGE_EMBED_COLOR -> changeEmbedColor(event);
+            case ADD_USER -> tryToAddUser(event);
+            case REMOVE_USER -> tryToRemoveUser(event);
+            case SET_REQUEST_DELAY -> setRequestDelay(event);
         }
     }
     
