@@ -1,5 +1,6 @@
 package maomao;
 
+import com.google.gson.Gson;
 import maomao.json_parsing.local.user_data.AniListUser;
 
 import java.io.IOException;
@@ -10,8 +11,6 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.HashMap;
 import java.util.Map;
-
-import static maomao.Serialization.serialize;
 
 public class AniListRequests
 {
@@ -58,7 +57,8 @@ public class AniListRequests
         payload.put("query", query);
         payload.put("variables", variables);
         
-       return serialize(payload);
+        Gson gson = new Gson();
+        return gson.toJson(payload);
     }
     
     

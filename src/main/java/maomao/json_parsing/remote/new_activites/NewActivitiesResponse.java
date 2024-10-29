@@ -1,5 +1,6 @@
 package maomao.json_parsing.remote.new_activites;
 
+import com.google.gson.Gson;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import maomao.json_parsing.local.user_data.AniListUser;
@@ -10,7 +11,6 @@ import java.net.http.HttpResponse;
 
 import static maomao.AniListRequests.createNewActivitiesPayload;
 import static maomao.AniListRequests.sendHttpRequest;
-import static maomao.Serialization.deserialize;
 
 public class NewActivitiesResponse
 {
@@ -33,6 +33,6 @@ public class NewActivitiesResponse
         
         HttpResponse<String> response = sendHttpRequest(newActivitiesPayload);
         
-        return deserialize(response.body(), NewActivitiesResponse.class);
+        return new Gson().fromJson(response.body(), NewActivitiesResponse.class);
     }
 }

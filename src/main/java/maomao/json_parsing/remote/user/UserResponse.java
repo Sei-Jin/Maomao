@@ -1,12 +1,13 @@
 package maomao.json_parsing.remote.user;
 
+import com.google.gson.Gson;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.http.HttpResponse;
 
 import static maomao.AniListRequests.createUserDataPayload;
 import static maomao.AniListRequests.sendHttpRequest;
-import static maomao.Serialization.deserialize;
 
 public class UserResponse
 {
@@ -24,6 +25,6 @@ public class UserResponse
         
         HttpResponse<String> response = sendHttpRequest(userDataPayload);
         
-        return deserialize(response.body(), UserResponse.class);
+        return new Gson().fromJson(response.body(), UserResponse.class);
     }
 }
