@@ -1,6 +1,6 @@
 package maomao.commands;
 
-import maomao.http.Requests;
+import maomao.http.Request;
 import maomao.json_parsing.local.config.BotConfiguration;
 import maomao.json_parsing.local.user_data.AniListUser;
 import maomao.json_parsing.local.user_data.AniListUsers;
@@ -43,7 +43,7 @@ public class SlashCommandHandler
         {
             String username = Objects.requireNonNull(event.getOption("username")).getAsString();
             
-            UserObject userResponse = Requests.sendUserRequest(username);
+            UserObject userResponse = Request.sendUserRequest(username);
             
             if (userResponse.getData() == null)
             {
@@ -106,7 +106,7 @@ public class SlashCommandHandler
         {
             String username = Objects.requireNonNull(event.getOption("username")).getAsString();
             
-            UserObject userResponse = Requests.sendUserRequest(username);
+            UserObject userResponse = Request.sendUserRequest(username);
             
             if (userResponse.getData() == null)
             {

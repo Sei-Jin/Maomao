@@ -13,7 +13,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
-public class Requests
+public class Request
 {
     private static HttpResponse<String> sendHttpRequest(String json) throws URISyntaxException, IOException, InterruptedException
     {

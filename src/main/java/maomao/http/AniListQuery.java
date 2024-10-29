@@ -1,6 +1,6 @@
 package maomao.http;
 
-public class AniListQueries
+public class AniListQuery
 {
     private static final String NEW_ACTIVITIES_QUERY = sanitizeQuery("""
             query ($userId: Int, $lastActivityTime: Int) {

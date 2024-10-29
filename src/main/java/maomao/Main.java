@@ -2,7 +2,7 @@ package maomao;
 
 import maomao.commands.SlashCommandListener;
 import maomao.commands.SlashCommandUpdater;
-import maomao.http.Requests;
+import maomao.http.Request;
 import maomao.json_parsing.remote.latest_activity.LatestActivityObject;
 import maomao.json_parsing.remote.new_activites.NewActivitiesObject;
 import maomao.json_parsing.local.user_data.AniListUser;
@@ -61,7 +61,7 @@ public class Main
             for (AniListUser user : aniListUsers.getUsers())
             {
                 // Check if there were new list activities for the user
-                LatestActivityObject latestActivityResponse = Requests.sendLatestActivityRequest(user);
+                LatestActivityObject latestActivityResponse = Request.sendLatestActivityRequest(user);
                 
                 waitBetweenRequests(botConfiguration);
                 
@@ -79,7 +79,7 @@ public class Main
                     continue;
                 }
                 
-                NewActivitiesObject newActivitiesResponse = Requests.sendNewActivitiesRequest(user);
+                NewActivitiesObject newActivitiesResponse = Request.sendNewActivitiesRequest(user);
                 
                 waitBetweenRequests(botConfiguration);
                 

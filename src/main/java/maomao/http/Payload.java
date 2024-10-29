@@ -23,7 +23,7 @@ public class Payload
         Map<String, Object> variables = new HashMap<>();
         variables.put("userId", user.getUserId());
         
-        String query = new AniListQueries().getLatestActivityTime();
+        String query = new AniListQuery().getLatestActivityTime();
         
         return createPayload(query, variables);
     }
@@ -35,7 +35,7 @@ public class Payload
         variables.put("userId", user.getUserId());
         variables.put("lastActivityTime", user.getLastActivityTime());
         
-        String query = new AniListQueries().getNewActivities();
+        String query = new AniListQuery().getNewActivities();
         
         return createPayload(query, variables);
     }
@@ -46,7 +46,7 @@ public class Payload
         Map<String, Object> variables = new HashMap<>();
         variables.put("username", username);
         
-        String query = new AniListQueries().getUserData();
+        String query = new AniListQuery().getUserData();
         
         return createPayload(query, variables);
     }
