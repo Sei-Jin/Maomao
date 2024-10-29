@@ -8,6 +8,16 @@ import java.util.Map;
 
 public class Payload
 {
+    public String createPayload(String query, Map<String, Object> variables)
+    {
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("query", query);
+        payload.put("variables", variables);
+        
+        return new Gson().toJson(payload);
+    }
+    
+    
     public String createLatestActivityTimePayload(AniListUser user)
     {
         Map<String, Object> variables = new HashMap<>();
@@ -39,15 +49,5 @@ public class Payload
         String query = new AniListQueries().getUserData();
         
         return createPayload(query, variables);
-    }
-    
-    
-    public String createPayload(String query, Map<String, Object> variables)
-    {
-        Map<String, Object> payload = new HashMap<>();
-        payload.put("query", query);
-        payload.put("variables", variables);
-        
-        return new Gson().toJson(payload);
     }
 }
