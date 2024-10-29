@@ -1,4 +1,4 @@
-package maomao;
+package maomao.commands;
 
 public enum BotCommand
 {

@@ -1,5 +1,7 @@
 package maomao;
 
+import maomao.commands.SlashCommandListener;
+import maomao.commands.SlashCommandUpdater;
 import maomao.http.Requests;
 import maomao.json_parsing.remote.latest_activity.LatestActivityObject;
 import maomao.json_parsing.remote.new_activites.NewActivitiesObject;
@@ -11,12 +13,8 @@ import maomao.json_parsing.remote.latest_activity.LatestActivity;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
-import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
-import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 
 import java.io.*;
@@ -37,7 +35,7 @@ public class Main
                 .build()
                 .awaitReady();
         
-        updateSlashCommands(jda);
+        SlashCommandUpdater.updateSlashCommands(jda);
         
         checkListActivitiesLoop(jda);
     }
@@ -111,32 +109,6 @@ public class Main
     private static void waitBetweenRequests(BotConfiguration botConfiguration) throws InterruptedException
     {
         Thread.sleep(botConfiguration.getRequestDelay());
-    }
-    
-    
-    private static void updateSlashCommands(JDA jda)
-    {
-        jda.getGuilds().getFirst().updateCommands()
-                .addCommands(
-                        Commands.slash(BotCommand.SET_CHANNEL.getCommand(), "Set the channel that will receive list updates")
-                                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR)),
-                        
-                        Commands.slash(BotCommand.ADD_USER.getCommand(), "Add a user to the list of users")
-                                .addOption(OptionType.STRING, "username", "An AniList username")
-                                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR)),
-                        
-                        Commands.slash(BotCommand.REMOVE_USER.getCommand(), "Remove a user from the list of users")
-                                .addOption(OptionType.STRING, "username", "An AniList username")
-                                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR)),
-                        
-                        Commands.slash(BotCommand.CHANGE_EMBED_COLOR.getCommand(), "Changes the color of the embeds")
-                                .addOption(OptionType.INTEGER, "embed-color", "The color of the embed as an integer value")
-                                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR)),
-                        
-                        Commands.slash(BotCommand.SET_REQUEST_DELAY.getCommand(), "Changes the delay between requests")
-                                .addOption(OptionType.INTEGER, "request-delay", "The wait time between requests in milliseconds")
-                                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.ADMINISTRATOR))
-                ).queue();
     }
     
     
