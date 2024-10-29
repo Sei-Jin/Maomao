@@ -100,7 +100,7 @@ public class Main
                     
                     MessageChannel listUpdateChannel = jda.getTextChannelById(botConfiguration.getChannelId());
                     
-                    sendMessage(Objects.requireNonNull(listUpdateChannel), embed);
+                    Objects.requireNonNull(listUpdateChannel).sendMessageEmbeds(embed).queue();
                 }
             }
         }
@@ -164,11 +164,5 @@ public class Main
                 .setThumbnail(activity.getUser().getAvatar().getMedium())
                 .setImage(imageURL)
                 .build();
-    }
-    
-    
-    private static void sendMessage(MessageChannel channel, MessageEmbed embed)
-    {
-        channel.sendMessageEmbeds(embed).queue();
     }
 }
