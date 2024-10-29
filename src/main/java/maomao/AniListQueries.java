@@ -2,42 +2,34 @@ package maomao;
 
 public class AniListQueries
 {
-    public String getNewActivities()
-    {
-        String newActivitiesQuery = """
-                query ($userId: Int, $lastActivityTime: Int) {
-                    Page {
-                        activities (userId: $userId, createdAt_greater: $lastActivityTime) {
-                            __typename
-                            ... on ListActivity {
-                                createdAt
-                                status
-                                media {
-                                    id
-                                    type
-                                    title {
-                                        english
-                                    }
+    private static final String NEW_ACTIVITIES_QUERY = sanitizeQuery("""
+            query ($userId: Int, $lastActivityTime: Int) {
+                Page {
+                    activities (userId: $userId, createdAt_greater: $lastActivityTime) {
+                        __typename
+                        ... on ListActivity {
+                            createdAt
+                            status
+                            media {
+                                id
+                                type
+                                title {
+                                    english
                                 }
-                                user {
-                                    name
-                                    avatar {
-                                        medium
-                                    }
+                            }
+                            user {
+                                name
+                                avatar {
+                                    medium
                                 }
                             }
                         }
                     }
                 }
-                """;
-        
-        return sanitizeQuery(newActivitiesQuery);
-    }
+            }
+            """);
     
-    
-    public String getLatestActivityTime()
-    {
-        String latestActivityTimeQuery = """
+    private static final String LATEST_ACTIVITY_TIME_QUERY = sanitizeQuery("""
                 query ($userId: Int) {
                     Activity (userId: $userId, sort: ID_DESC) {
                             __typename
@@ -46,15 +38,9 @@ public class AniListQueries
                         }
                     }
                 }
-                """;
-        
-        return sanitizeQuery(latestActivityTimeQuery);
-    }
+                """);
     
-    
-    public String getUserData()
-    {
-        String userInfoQuery = """
+    private static final String USER_DATA_QUERY = """
                 query ($username: String) {
                     User (search: $username) {
                         id
@@ -62,16 +48,24 @@ public class AniListQueries
                     }
                 }
                 """;
-        
-        return sanitizeQuery(userInfoQuery);
-    }
     
-    
-    private String sanitizeQuery(String query)
+    public String getNewActivities()
     {
-        query = query.replace('\n', ' ');
-        
-        return query;
+        return NEW_ACTIVITIES_QUERY;
     }
     
+    public String getLatestActivityTime()
+    {
+        return LATEST_ACTIVITY_TIME_QUERY;
+    }
+    
+    public String getUserData()
+    {
+        return USER_DATA_QUERY;
+    }
+    
+    private static String sanitizeQuery(String query)
+    {
+        return query.replace('\n', ' ');
+    }
 }
