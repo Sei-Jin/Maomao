@@ -1,9 +1,10 @@
 package maomao;
 
+import maomao.http.Requests;
 import maomao.json_parsing.local.config.BotConfiguration;
 import maomao.json_parsing.local.user_data.AniListUser;
 import maomao.json_parsing.local.user_data.AniListUsers;
-import maomao.json_parsing.remote.user.UserResponse;
+import maomao.json_parsing.remote.user.UserObject;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
@@ -45,7 +46,7 @@ public class SlashCommandListener extends ListenerAdapter
         {
             String username = Objects.requireNonNull(event.getOption("username")).getAsString();
             
-            UserResponse userResponse = UserResponse.getUserResponse(username);
+            UserObject userResponse = Requests.sendUserRequest(username);
             
             if (userResponse.getData() == null)
             {
@@ -87,7 +88,7 @@ public class SlashCommandListener extends ListenerAdapter
     }
     
     
-    private boolean removeUser(UserResponse userResponse)
+    private boolean removeUser(UserObject userResponse)
     {
         AniListUsers aniListUsers = AniListUsers.getUserData();
         
@@ -113,7 +114,7 @@ public class SlashCommandListener extends ListenerAdapter
         {
             String username = Objects.requireNonNull(event.getOption("username")).getAsString();
             
-            UserResponse userResponse = UserResponse.getUserResponse(username);
+            UserObject userResponse = Requests.sendUserRequest(username);
             
             if (userResponse.getData() == null)
             {
@@ -157,7 +158,7 @@ public class SlashCommandListener extends ListenerAdapter
     }
     
     
-    private static void addUser(UserResponse userResponse)
+    private static void addUser(UserObject userResponse)
     {
         AniListUser newUser = new AniListUser();
         newUser.setUserId(userResponse.getData().getUser().getId());
