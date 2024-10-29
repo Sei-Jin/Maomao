@@ -1,6 +1,6 @@
 package maomao;
 
-import maomao.JsonParsing.Local.UserData.AniListUser;
+import maomao.json_parsing.local.user_data.AniListUser;
 
 import java.io.IOException;
 import java.net.URI;

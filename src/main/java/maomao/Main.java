@@ -1,12 +1,12 @@
 package maomao;
 
-import maomao.JsonParsing.Remote.LatestActivity.LatestActivityResponse;
-import maomao.JsonParsing.Remote.NewActivities.NewActivitiesResponse;
-import maomao.JsonParsing.Local.UserData.AniListUser;
-import maomao.JsonParsing.Local.UserData.AniListUsers;
-import maomao.JsonParsing.Local.Config.BotConfiguration;
-import maomao.JsonParsing.Remote.NewActivities.Activity;
-import maomao.JsonParsing.Remote.LatestActivity.LatestActivity;
+import maomao.json_parsing.remote.latest_activity.LatestActivityResponse;
+import maomao.json_parsing.remote.new_activites.NewActivitiesResponse;
+import maomao.json_parsing.local.user_data.AniListUser;
+import maomao.json_parsing.local.user_data.AniListUsers;
+import maomao.json_parsing.local.config.BotConfiguration;
+import maomao.json_parsing.remote.new_activites.Activity;
+import maomao.json_parsing.remote.latest_activity.LatestActivity;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;

@@ -1,4 +1,4 @@
-package maomao.JsonParsing.Local.Config;
+package maomao.json_parsing.local.config;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

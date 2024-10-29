@@ -1,8 +1,8 @@
-package maomao.JsonParsing.Remote.LatestActivity;
+package maomao.json_parsing.remote.latest_activity;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import maomao.JsonParsing.Local.UserData.AniListUser;
+import maomao.json_parsing.local.user_data.AniListUser;
 
 import java.io.IOException;
 import java.net.URISyntaxException;

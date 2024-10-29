@@ -1,4 +1,4 @@
-package maomao.JsonParsing.Remote.User;
+package maomao.json_parsing.remote.user;
 
 public class Data
 {

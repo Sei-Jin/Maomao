@@ -1,9 +1,8 @@
-package maomao.JsonParsing.Remote.User;
+package maomao.json_parsing.remote.user;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.http.HttpResponse;
-import java.util.Objects;
 
 import static maomao.AniListRequests.createUserDataPayload;
 import static maomao.AniListRequests.sendHttpRequest;

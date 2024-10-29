@@ -1,9 +1,9 @@
 package maomao;
 
-import maomao.JsonParsing.Local.Config.BotConfiguration;
-import maomao.JsonParsing.Local.UserData.AniListUser;
-import maomao.JsonParsing.Local.UserData.AniListUsers;
-import maomao.JsonParsing.Remote.User.UserResponse;
+import maomao.json_parsing.local.config.BotConfiguration;
+import maomao.json_parsing.local.user_data.AniListUser;
+import maomao.json_parsing.local.user_data.AniListUsers;
+import maomao.json_parsing.remote.user.UserResponse;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
