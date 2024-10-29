@@ -1,7 +1,6 @@
 package maomao.http;
 
 import com.google.gson.Gson;
-import maomao.AniListQueries;
 import maomao.json_parsing.local.user_data.AniListUser;
 
 import java.util.HashMap;
@@ -14,8 +13,7 @@ public class Payload
         Map<String, Object> variables = new HashMap<>();
         variables.put("userId", user.getUserId());
         
-        AniListQueries aniListQueries = new AniListQueries();
-        String query = aniListQueries.getLatestActivityTime();
+        String query = new AniListQueries().getLatestActivityTime();
         
         return createPayload(query, variables);
     }
@@ -27,8 +25,7 @@ public class Payload
         variables.put("userId", user.getUserId());
         variables.put("lastActivityTime", user.getLastActivityTime());
         
-        AniListQueries aniListQueries = new AniListQueries();
-        String query = aniListQueries.getNewActivities();
+        String query = new AniListQueries().getNewActivities();
         
         return createPayload(query, variables);
     }
@@ -39,8 +36,7 @@ public class Payload
         Map<String, Object> variables = new HashMap<>();
         variables.put("username", username);
         
-        AniListQueries aniListQueries = new AniListQueries();
-        String query = aniListQueries.getUserData();
+        String query = new AniListQueries().getUserData();
         
         return createPayload(query, variables);
     }

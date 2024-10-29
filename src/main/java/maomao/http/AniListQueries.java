@@ -1,4 +1,4 @@
-package maomao;
+package maomao.http;
 
 public class AniListQueries
 {
