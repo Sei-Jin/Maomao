@@ -15,7 +15,7 @@ import java.net.http.HttpResponse;
 
 public class Requests
 {
-    public static HttpResponse<String> sendHttpRequest(String json) throws URISyntaxException, IOException, InterruptedException
+    private static HttpResponse<String> sendHttpRequest(String json) throws URISyntaxException, IOException, InterruptedException
     {
         HttpClient client = HttpClient.newBuilder()
                 .build();

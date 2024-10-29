@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class Payload
 {
-    public String createPayload(String query, Map<String, Object> variables)
+    private String createPayload(String query, Map<String, Object> variables)
     {
         Map<String, Object> payload = new HashMap<>();
         payload.put("query", query);
